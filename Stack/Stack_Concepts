@@ -1,0 +1,335 @@
+栈
+1、概念：栈是一种特殊的线性表，只允许在固定的一端进行插入和删除元素
+                操作。进行数据插入和删除操作的一端称为栈顶，另一端称为栈底。
+                栈中的数据元素遵守后进先出LIFO（Last In First Out）的原则。
+2、出入栈规则
+入栈：栈的插入操作叫做进栈/压栈/入栈，入数据在栈顶。
+出栈：栈的删除操作叫做出栈。出数据在栈顶。
+
+3、基本操作
+ 通过继承了Vector类，Stack类可以很容易的实现他本身的功能。因为大部分的功能在Vector里面已经提供支持了。
+Stack通过五个操作对Vector进行扩展，这个五个操作如下：
+empty():判断堆栈是否为空。
+peek():查看堆栈顶部的元素，但不取走。
+pop():移除堆栈顶部的元素，并作为函数的值返回该元素。
+push(E item):将item压入栈顶部。
+search(Object o):返回元素对象o在堆栈中的位置，以1为基数。
+
+4、具体实现
+   （1）存 int 类型
+      class Stack {
+         //属性
+           //存数据的空间       int[] array;
+           //当前栈内元素个数    int top;  //在栈里写做top，表示栈顶元素
+
+        //方法（公开）
+           构造方法
+           插入数据     （尾插）  void push(int  val);
+           删除数据     （尾删）  void pop();
+          查看栈顶元素  [top-1]   int peek();
+          返回栈内数据元素个数  top   int size();
+          判断栈是否为空 top==0；   boolean  isEmpty();
+   }
+
+
+   （2）栈对于基本操作的代码演示
+//1. 利用顺序表实现，即使用尾插 + 尾删的方式实现
+//2. 利用链表实现，则头尾皆可相对来说，顺序表的实现上要更为简单一些，所以我们优先用顺序表实现栈。
+
+import java.util.Arrays;
+
+//顺序表简单实现栈
+public class MyStack {
+    //属性
+    private int[] array;
+    private int top;
+
+    //构造方法
+    public MyStack(int defaultCapacity){
+        array=new int[defaultCapacity];
+        top=0;
+    }
+    public MyStack(){
+        this(20);
+    }
+    //入栈
+    public void push(int val){
+        if(top==array.length){
+            array=Arrays.copyOf(array,array.length*2);
+        }
+        array[top++]=val;
+    }
+    //出栈
+    public void pop(){
+        if(top<0){
+            System.out.println("栈为空，无法删除！");
+            return;
+        }
+        top--;
+        array[top]=0;// 可加可不加，把所有空的位置保持为 0
+    }
+    //返回栈顶元素
+    public int peek(){
+        if (top <= 0) {
+            System.out.println("栈为空，无法返回栈顶元素");
+            return -1;
+        }
+        return array[top-1];
+    }
+    // 返回栈内数据元素个数
+    public int size() {
+        return top;
+    }
+    //判断栈是否为空
+    public boolean isEmpty() {
+        return top == 0;
+    }
+}
+
+
+5、栈的应用：
+   （1）有效的括号：（括号匹配问题）
+      给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。
+      有效字符串需满足：
+               左括号必须用相同类型的右括号闭合。
+               左括号必须以正确的顺序闭合。
+               注意空字符串可被认为是有效字符串。
+   示例 1:        示例 2:        示例 3:      示例 4:      示例 5:
+   输入: "()"     输入: "()[]{}"  输入: "(]"    输入: "([)]"  输入: "{[]}"
+   输出: true     输出: true      输出: false   输出: false   输出: true
+
+import java.util.Stack;
+public class IsValidBrackets {
+    //【解题思路】：遍历字符串中的每个字符
+    //                 如果是左括号：入栈
+    //                如果是右括号：
+    //                    若栈是空的：则不匹配（则右括号多了）  }}}}
+    //                    出栈
+    //                    如果左右括号不匹配：则不匹配    (} (}
+    //                    否则继续循环
+    //                如果栈不为空：则不匹配（右括号多）   {{{{
+    //                否则匹配
+
+    //【复杂度分析】：时间复杂度O(n)  空间复杂度O(n)
+    public boolean isValid(String s) {
+        Stack<Character> stack=new Stack<>();
+        for(int i=0;i<s.length();i++){
+            char c=s.charAt(i);
+
+            switch (c){
+                case '(':
+                case '[':
+                case '{':
+                    stack.push(c);
+                    break;
+                case ')':
+                case ']':
+                case '}': {
+                    if (stack.isEmpty()) {
+                        return false;
+                    }
+                    char left = stack.remove(stack.size() - 1);
+                    if (!((left == '(' && c == ')') ||
+                            (left == '[' && c == ']') ||
+                            (left == '{' && c == '}'))) {
+                        return false;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        if(stack.isEmpty()){
+            return true;
+        }else {
+            return false;
+        }
+    }
+}
+
+
+    （2）用两个栈实现队列：
+
+//题目描述：使用栈实现队列的下列操作：
+//push(x) -- 将一个元素放入队列的尾部。
+//pop() -- 从队列首部移除元素。
+//peek() -- 返回队列首部的元素。
+//empty() -- 返回队列是否为空。
+
+//示例:
+//MyQueue queue = new MyQueue();
+//queue.push(1);
+//queue.push(2);
+//queue.peek();  // 返回 1
+//queue.pop();   // 返回 1
+//queue.empty(); // 返回 false
+
+//说明:
+//你只能使用标准的栈操作 -- 也就是只有 push to top, peek/pop from top, size, 和 is  empty 操作是合法的。
+//你所使用的语言也许不支持栈。你可以使用 list 或者 deque（双端队列）来模拟一个栈，只要是标准的栈操作即可。
+//假设所有操作都是有效的 （例如，一个空的队列不会调用 pop 或者 peek 操作）。
+
+import java.util.Stack;
+
+public class TwoStackToQueue_232 {
+    private Stack<Integer> out;//出的栈（上图中左边的）
+    private Stack<Integer> in;//入的栈（上图中右边的）
+    public TwoStackToQueue_232(){
+        out=new Stack<>();
+        in=new Stack<>();
+    }
+
+    public void push(int x){
+        in.push(x);//尾插
+    }
+
+    public int pop(){
+        if(out.isEmpty()) {
+            while(!in.isEmpty()){
+                out.push(in.pop());//将从in栈里出来的元素，再添加到out栈里去，实现顺序颠倒
+            }
+        }
+        return out.pop();
+    }
+
+    public int peek(){
+        if(out.isEmpty()) {
+            while(!in.isEmpty()){
+                out.push(in.pop());//将从in栈里出来的元素，再添加到out栈里去，实现顺序颠倒
+            }
+        }
+        return out.peek();//返回最后一个元素即可
+    }
+
+    public boolean empty(){
+        return out.isEmpty() && in.isEmpty();
+    }
+}
+
+
+   （3）包含min函数的栈（或实现最小栈）
+
+//题目描述：定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的 min 函数，在该栈中，调用 min、push 及 pop 的时间复杂度都是 O(1)。
+
+//复杂度分析：
+//时间复杂度 O(1) ：push(), pop(), top(), min() 四个函数的时间复杂度均为常数级别。
+//空间复杂度 O(N) ：当共有 N 个待入栈元素时，辅助栈 normal 最差情况下存储 N 个元素，
+//                        使用 O(N) 额外空间
+
+//示例：
+//MinStack minStack = new MinStack();
+//minStack.push(-2);
+//minStack.push(0);
+//minStack.push(-3);
+//minStack.min();   --> 返回 -3.
+//minStack.pop();
+//minStack.top();   --> 返回 0.
+//minStack.min();   --> 返回 -2.
+//解题思路：要做出这道题目，首先要理解栈结构先进后出的性质。
+//
+//对于栈来说，如果一个元素 a 在入栈时，栈里有其它的元素 b, c, d，那么无论这个栈
+// 在之后经历了什么操作，只要 a 在栈中，b, c, d 就一定在栈中，因为在 a 被弹出
+// 之前，b, c, d 不会被弹出。
+//因此，在操作过程中的任意一个时刻，只要栈顶的元素是 a，那么我们就可以确定栈里面
+// 现在的元素一定是 a, b, c, d。
+//那么，我们可以在每个元素 a 入栈时把当前栈的最小值 m 存储起来。在这之后无论何时，
+// 如果栈顶元素是 a，我们就可以直接返回存储的最小值 m。
+
+//算法：
+//按照上面的思路，我们只需要设计一个数据结构，使得每个元素 a 与其相应的最小值 m 时刻
+//保持一一对应。因此我们可以使用一个辅助栈，与元素栈同步插入与删除，用于存储与每个
+// 元素对应的最小值。
+//  1、当一个元素要入栈时，我们取当前辅助栈的栈顶存储的最小值，与当前元素比较得出最小值，
+//  将这个最小值插入辅助栈中；
+//  2、当一个元素要出栈时，我们把辅助栈的栈顶元素也一并弹出；
+//  3、在任意一个时刻，栈内元素的最小值就存储在辅助栈的栈顶元素中。
+import java.util.Stack;
+//时间复杂度O(1)        空间复杂度O(n)
+//借助辅助栈
+public class MinStack_30 {
+
+    Stack<Integer> normal;//正常栈
+    Stack<Integer> min;   //最小栈
+    /** initialize your data structure here. */
+    public MinStack_30() {
+        normal=new Stack<>();
+        min=new Stack<>();
+    }
+
+    public void push(int x) {
+        normal.push(x);
+        if(min.isEmpty()){
+            min.push(x);
+        }else if(x<=min.peek()){
+            min.push(x);
+        }else {
+            min.push(min.peek());
+        }
+    }
+
+    public void pop() {
+        normal.pop();
+        min.pop();
+    }
+
+    public int top() {
+        return normal.peek();
+    }
+
+    public int min() {
+        return min.peek();
+    }
+}
+
+
+   （4）栈的压入、弹出序列
+//题目描述：输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否
+//          为该栈的弹出顺序。
+//          假设压入栈的所有数字均不相等。例如，序列 {1,2,3,4,5}是某栈的压栈序列，
+//          序列 {4,5,3,2,1} 是该压栈序列对应的一个弹出序列，但 {4,3,5,1,2} 就不可
+//          能是该压栈序列的弹出序列。
+//
+//解题思路：
+//给定一个压入序列 pushed 和弹出序列 popped，则压入 / 弹出操作的顺序（即排列）
+//是唯一确定 的。
+
+//栈的数据操作具有 先入后出 的特性，因此某些弹出序列是无法实现的。
+//考虑借用一个辅助栈 stack ，模拟 压入 / 弹出操作的排列。根据是否模拟成功，
+// 即可得到结果。
+
+//入栈操作： 按照压栈序列的顺序执行。
+//出栈操作： 每次入栈后，循环判断 “栈顶元素 == 弹出序列的当前元素” 是否成立，
+//           将符合弹出序列顺序的栈顶元素全部弹出。
+//           由于题目规定栈的所有数字均不相等 ，因此在循环入栈中，每个元素出栈的
+//           位置的可能性是唯一的（若有重复数字，则具有多个可出栈的位置）。因而，
+//           在遇到 “栈顶元素 == 弹出序列的当前元素” 就应立即执行出栈。
+//
+//算法流程：
+//       初始化： 辅助栈 stack ，弹出序列的索引 i；
+//       遍历压栈序列： 各元素记为 num ；
+//       元素 num 入栈；
+//       循环出栈：若 stack 的栈顶元素 == 弹出序列元素 popped[i] ，则执行出栈与 i++ ；
+//       返回值： 若 stack 为空，则此弹出序列合法。
+
+//复杂度分析：
+//时间复杂度 O(N) ： 其中 N 为列表 pushed的长度；每个元素最多入栈与出栈一次，
+//                   即最多共 2N 次出入栈操作。
+//空间复杂度 O(N) ： 辅助栈 stack 最多同时存储 N 个元素。
+import java.util.Stack;
+
+public class IsPopOrder_31 {
+    public boolean validateStackSequences(int[] pushed, int[] popped) {
+        Stack<Integer> stack=new Stack<>();
+        int i=0;
+        for(int num:pushed){
+            stack.push(num);
+            //// 循环判断与出栈
+            while (!stack.isEmpty()&&stack.peek()==popped[i]){
+                stack.pop();
+                i++;
+            }
+        }
+        return stack.isEmpty();
+    }
+}
